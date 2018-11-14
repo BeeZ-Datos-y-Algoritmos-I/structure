@@ -1,4 +1,4 @@
-package main.java.structure.complex;
+package structure.complex;
 
 public class ComplexityExporter {
 }

@@ -1,6 +1,7 @@
 package structure.complex.kdtree;
 
 import data.Bee;
+import data.Metric;
 import reader.best.AllLinesNIOPrimitiveReader;
 import reader.common.IPrimitiveReader;
 import structure.complex.kdtree.element.KDTree;
@@ -17,73 +18,62 @@ public class KDTreeStructure implements IStructure {
     private IPrimitiveReader reader;
 
     @Override
-    public long craft() {
+    public Metric craft() {
 
-        long millis = new Date().getTime();
+        Metric metric = new Metric();
 
         tree = new KDTree<Bee>(3);
-        return new Date().getTime() - millis;
+        return metric.consume();
 
     }
 
     @Override
-    public long read() {
+    public Metric read() {
 
-        long millis = new Date().getTime();
+        Metric metric = new Metric();
 
         reader = new AllLinesNIOPrimitiveReader();
         reader.load();
 
-        return new Date().getTime() - millis;
+        return metric.consume();
 
     }
 
     @Override
-    public long insert() {
+    public Metric insert() {
 
-        long millis = new Date().getTime();
+        Metric metric = new Metric();
 
         for (Bee bee : reader.getBees())
             tree.insert(bee.toCartesianArr3D(), bee);
 
         System.out.println("[KDTREE] Tamaño del KDTree (" + tree.size() + ")");
-        return new Date().getTime() - millis;
+        return metric.consume();
 
     }
 
     @Override
-    public long detect() {
+    public Metric detect() {
 
         LinkedList<Bee> collide = new LinkedList<Bee>();
-        long millis = new Date().getTime();
-
-        long b = 0, h = 0;
+        Metric metric = new Metric();
 
         for (Bee bee : reader.getBees()) {
 
-            long k = new Date().getTime();
-
             List<Bee> near = tree.nearest(bee.toCartesianArr3D(), 2);
-
-            b += new Date().getTime() - k;
-
-            long l = new Date().getTime();
 
             if (CollisionUtil.check2DCollision(bee, near.get(0)))
                 collide.add(bee);
 
-            h += new Date().getTime() - l;
-
         }
 
-        System.out.println(b + "    " + h);
         System.out.println("[KDTREE] Colisiones posibles: " + collide.size());
-        return new Date().getTime() - millis;
+        return metric.consume();
     }
 
     @Override
-    public long save() {
-        return 0;
+    public Metric save() {
+        return null;
     }
 
 }

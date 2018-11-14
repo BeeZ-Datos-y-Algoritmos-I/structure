@@ -1,9 +1,11 @@
 package structure.complex.matrix3d;
 
 import data.Bee;
+import data.Metric;
 import reader.best.AllLinesNIOEdgesPrimitiveReader;
 import structure.common.IStructure;
 import structure.complex.matrix3d.compose.Matrix3DSpace;
+import util.CollisionUtil;
 import util.WorldUtil;
 
 import java.util.Date;
@@ -15,108 +17,85 @@ public class Matrix3DStructure implements IStructure {
     private AllLinesNIOEdgesPrimitiveReader reader;
 
     @Override
-    public long craft() {
+    public Metric craft() {
 
-        long millis = new Date().getTime();
+        Metric metric = new Metric();
 
         matrix = new Matrix3DSpace(reader.getMaxBound(), reader.getMinBound());
 
-        return new Date().getTime() - millis;
+        return metric.consume();
     }
 
     @Override
-    public long read() {
+    public Metric read() {
 
-        long millis = new Date().getTime();
+        Metric metric = new Metric();
 
         reader = new AllLinesNIOEdgesPrimitiveReader();
         reader.load();
 
-        return new Date().getTime() - millis;
+        return metric.consume();
     }
 
     @Override
-    public long insert() {
+    public Metric insert() {
 
-        long millis = new Date().getTime();
+        Metric metric = new Metric();
 
-        for (Bee bee : reader.getBees()) {
+        for (int i = 0; i < reader.getBees().length; ++i) {
 
-            int posx = WorldUtil.getFloorPosition(bee.getX(), reader.getMinBound().getX()),
-                    posy = WorldUtil.getFloorPosition(bee.getY(), reader.getMinBound().getY()),
-                    posz = WorldUtil.getFloorPosition(bee.getZ(), reader.getMinBound().getZ());
+            Bee bee = reader.getBees()[i];
+            int x = (int) ((bee.getX() - reader.getMinBound().getX()) * 100000 / 70.72);
+            int y = (int) ((bee.getY() - reader.getMinBound().getY()) * 100000 / 70.72);
+            int z = (int) ((bee.getZ() - reader.getMinBound().getZ()) / 70.72);
 
-            if (matrix.get(posx, posy, posz) == null)
-                matrix.insert(posx, posy, posz);
-
-            matrix.get(posx, posy, posz).add(bee);
-
+            if (x > 0) {
+                x--;
+            }
+            if (y > 0) {
+                y--;
+            }
+            if (z > 0) {
+                z--;
+            }
+            if (matrix.get(x, y, z) == null) {
+                matrix.insert(x, y, z);
+                matrix.get(x, y, z).add(bee);
+            } else {
+                matrix.get(x, y, z).push(bee);
+            }
         }
 
         System.out.println("[MATRIX3D] Tamaño de la Matriz 3D (" + matrix.getSizeX() * matrix.getSizeY() * matrix.getSizeZ() + ")");
-        return new Date().getTime() - millis;
+        return metric.consume();
     }
 
     @Override
-    public long detect() {
+    public Metric detect() {
 
         LinkedList<Bee> collide = new LinkedList<Bee>();
-        long millis = new Date().getTime();
+        Metric metric = new Metric();
 
         for (int x = 0; x < matrix.getSizeX(); x++)
             for (int y = 0; y < matrix.getSizeY(); y++)
                 for (int z = 0; z < matrix.getSizeZ(); z++) {
 
-                    int count = matrix.count(x, y, z);
+                    if (matrix.get(x, y, z) == null)
+                        continue;
 
-                    if (count > -1)
-                        for (int k = 0; k < count; k++)
-                            collide.add(matrix.get(x, y, z).get(k));
-                    else if (matrix.get(x, y, z) != null) {
+                    if (matrix.get(x, y, z).size() > 1)
+                        for (Bee bee : matrix.get(x, y, z))
+                            collide.add(bee);
 
-                        boolean collision = false;
-
-                        double x1 = matrix.get(x, y, z).get(0).getX();
-                        double y1 = matrix.get(x, y, z).get(0).getY();
-                        double z1 = matrix.get(x, y, z).get(0).getZ();
-
-                        for (int deltaX = (x > 0 ? -1 : 0); deltaX <= (x < matrix.getSizeX() - 1 ? 1 : 0) && !collision; deltaX++) {
-                            for (int deltaY = (y > 0 ? -1 : 0); deltaY <= (y < matrix.count(x) - 1 ? 1 : 0) && !collision; deltaY++) {
-                                for (int deltaZ = (z > 0 ? -1 : 0); deltaZ <= (z < matrix.count(x, y) - 1 ? 1 : 0) && !collision; deltaZ++) {
-                                    if (deltaX != 0 || deltaY != 0 || deltaZ != 0) {
-                                        if (matrix.get(x + deltaX, y + deltaY, z + deltaZ) != null) {
-                                            for (int w = 0; w < matrix.count(x + deltaX, y + deltaY, z + deltaZ) && !collision; w++) {
-
-                                                LinkedList<Bee> node = matrix.get(x + deltaX, y + deltaY, z + deltaZ);
-
-                                                double x2 = node.get(w).getX();
-                                                double y2 = node.get(w).getY();
-                                                double z2 = node.get(w).getZ();
-
-                                                if (Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2) + Math.pow(z1 - z2, 2) <= 10000) {
-                                                    collision = true;
-                                                }
-
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        if (collision) {
-                            collide.add(matrix.get(x, y, z).get(0));
-                        }
-                    }
                 }
 
         System.out.println("[MATRIX3D] Colisiones posibles: " + collide.size());
-        return new Date().getTime() - millis;
+        return metric.consume();
     }
 
     @Override
-    public long save() {
-        return 0;
+    public Metric save() {
+        return null;
     }
 
 }

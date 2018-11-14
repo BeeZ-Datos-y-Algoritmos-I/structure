@@ -1,15 +1,17 @@
 package structure.common;
 
+import data.Metric;
+
 public interface IStructure {
 
-    public long craft();
+    public Metric craft();
 
-    public long read();
+    public Metric read();
 
-    public long insert();
+    public Metric insert();
 
-    public long detect();
+    public Metric detect();
 
-    public long save();
+    public Metric save();
 
 }

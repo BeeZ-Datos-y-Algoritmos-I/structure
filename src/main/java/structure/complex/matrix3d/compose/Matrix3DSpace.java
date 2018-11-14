@@ -2,7 +2,6 @@ package structure.complex.matrix3d.compose;
 
 import data.Bee;
 import javafx.geometry.Point3D;
-import util.WorldUtil;
 
 import java.util.LinkedList;
 
@@ -16,9 +15,9 @@ public class Matrix3DSpace {
         this.max = max;
         this.min = min;
 
-        int xsize = WorldUtil.getLayerSize(max.getX(), min.getX()),
-                ysize = WorldUtil.getLayerSize(max.getY(), min.getY()),
-                zsize = WorldUtil.getLayerSize(max.getZ(), min.getZ());
+        int xsize = (int) ((max.getX() - min.getX()) * 100000 / 70.72),
+                ysize = (int) ((max.getY() - min.getY()) * 100000 / 70.72),
+                zsize = (int) ((max.getZ() - min.getZ()) / 70.72);
 
         spatial = new LinkedList[xsize][ysize][zsize];
         length = new Point3D(xsize, ysize, zsize);

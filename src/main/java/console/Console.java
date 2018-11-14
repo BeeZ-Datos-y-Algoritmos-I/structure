@@ -1,7 +1,7 @@
 package console;
 
 import config.Config;
-import reader.common.IReader;
+import data.Metric;
 import structure.common.StructureType;
 import util.ConfigUtil;
 import util.FileUtil;
@@ -25,18 +25,18 @@ public class Console {
         structure = ConfigUtil.getStructureType();
         System.out.println("[ACCIÓN]: Se utilizará la estructura de datos " + structure.name() + ".");
 
-        Date date = makeDate();
+        Metric totalMetric = new Metric();
 
-        System.out.println("[LECTÓR]: La lectura ha tardado: " + structure.getStructure().read() + " ms");
+        System.out.println("[LECTÓR]: La lectura ha consumido: " + structure.getStructure().read());
         System.out.println("[ANALIZADOR]: Generando archivo " + Config.FILES.get("output_path") + "...");
 
-        System.out.println("[ESTRUCTURA]: La instanciación de la estructura ha tardado: " + structure.getStructure().craft() + " ms");
-        System.out.println("[ESTRUCTURA]: La estructura ha insertado todos los datos en: " + structure.getStructure().insert() + " ms");
-        System.out.println("[ESTRUCTURA]: La estructura ha detectado las posibles colisiones en: " + structure.getStructure().detect() + " ms");
+        System.out.println("[ESTRUCTURA]: La instanciación de la estructura ha consumido: " + structure.getStructure().craft());
+        System.out.println("[ESTRUCTURA]: La estructura ha insertado todos los datos consumiendo: " + structure.getStructure().insert());
+        System.out.println("[ESTRUCTURA]: La estructura ha detectado las posibles colisiones consumiendo: " + structure.getStructure().detect());
 
-        long diff = (makeDate().getTime() - date.getTime());
+        totalMetric.consume();
 
-        System.out.println("[INFORMACIÓN]: El tiempo total que se ha tardado en cargar todo ha sido en " + diff + " ms");
+        System.out.println("[INFORMACIÓN]: El tiempo total que se ha tardado en cargar todo ha sido de " + totalMetric.getTimeUsage());
 
     }
 
